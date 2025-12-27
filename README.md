@@ -1,12 +1,12 @@
 # Video Editor
 
-Video Editor is a small browser-based prototype that experiments with different layouts and controls for editing or previewing video using only HTML, CSS, and JavaScript.[web:6][web:13]
+Video Editor is a small browser-based prototype that experiments with different layouts and controls for editing or previewing video using only HTML, CSS, and JavaScript.
 
 ## Features
 
-- Multiple interface iterations across `video editor 0.html` – `video editor 5.html`.[web:3]
+- Multiple interface iterations across `video editor 0.html` – `video editor 5.html`.
 - Basic video playback controls (play, pause, scrub) in the browser.
-- Simple, framework-free implementation using vanilla web technologies.[web:6]
+- Simple, framework-free implementation using vanilla web technologies.
 
 ## Project structure
 
@@ -15,7 +15,7 @@ Video Editor is a small browser-based prototype that experiments with different 
 - `video editor 2.html` – Additional tweaks or interaction changes.
 - `video editor 3.html` – Further iteration of the editor design.
 - `video editor 4.html` – Alternative layout or behavior.
-- `video editor 5.html` – Latest prototype of the editor.[web:3]
+- `video editor 5.html` – Latest prototype of the editor.
 - `LICENSE` – MIT license for this project.
 - `README.md` – Project overview and usage instructions.
 
@@ -25,18 +25,18 @@ Video Editor is a small browser-based prototype that experiments with different 
 - Use the provided controls to:
 - Play and pause the sample video.
 - Scrub through the timeline if a seek bar is available.
-- Interact with any experimental buttons or sliders present in that version.[web:6]
+- Interact with any experimental buttons or sliders present in that version.
 
 If you encounter issues, make sure:
 
 - The video source path used in the HTML file is correct.
-- You are running the files over HTTP if the browser blocks local media access.[web:6][web:17]
+- You are running the files over HTTP if the browser blocks local media access.
 
 ## Technologies
 
 - **HTML5** for structure and `<video>` element.
 - **CSS3** for layout and styling.
-- **JavaScript** (vanilla) for player controls and any editing logic.[web:6][web:9]
+- **JavaScript** (vanilla) for player controls and any editing logic.
 
 ## Roadmap
 
@@ -45,7 +45,7 @@ Potential future improvements:
 - Timeline with selectable in/out points.
 - Basic trimming and export of clips.
 - Keyboard shortcuts for precise navigation.
-- Dark/light theme toggle for the editor UI.[web:12][web:16]
+- Dark/light theme toggle for the editor UI.
 
 ## Contributing
 
