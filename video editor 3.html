@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidCraft Pro - Professional Video Editing Platform</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .dark .glass-effect {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .dark .gradient-text {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .dark .hero-bg {
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+        }
+        
+        .feature-card {
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px) rotateX(5deg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .dark .feature-card:hover {
+            box-shadow: 0 25px 50px -12px rgba(255, 255, 255, 0.1);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+        
+        .timeline-container {
+            background: linear-gradient(90deg, #1e3a8a, #3b82f6, #06b6d4, #10b981);
+            background-size: 400% 400%;
+            animation: gradientShift 4s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+        
+        .video-player {
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .control-panel {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: #333;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+            width: 30%;
+            transition: width 0.1s ease;
+        }
+        
+        .tool-button {
+            transition: all 0.2s ease;
+        }
+        
+        .tool-button:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .editor-timeline {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        .timeline-track {
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            margin: 2px 0;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .timeline-clip {
+            height: 100%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 4px;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            color: white;
+            font-size: 12px;
+            cursor: grab;
+        }
+        
+        .timeline-clip:active {
+            cursor: grabbing;
+        }
+        
+        .stats-counter {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #3b82f6;
+        }
+        
+        .dark .stats-counter {
+            color: #f093fb;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <!-- Animated Background Canvas -->
+    <div class="canvas-container">
+        <canvas id="bg-canvas"></canvas>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-effect">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-bold gradient-text">VidCraft Pro</h1>
+                    </div>
+                    <div class="hidden md:block ml-10">
+                        <div class="flex items-baseline space-x-4">
+                            <a href="#home" class="nav-link text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Home</a>
+                            <a href="#features" class="nav-link text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Features</a>
+                            <a href="#editor" class="nav-link text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Editor</a>
+                            <a href="#pricing" class="nav-link text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Pricing</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="theme-toggle" class="p-2 rounded-lg glass-effect hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <i id="theme-icon" class="fas fa-moon text-gray-600 dark:text-gray-400"></i>
+                    </button>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        Get Started
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-bg min-h-screen flex items-center relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="text-center lg:text-left">
+                    <h1 class="text-5xl lg:text-7xl font-black text-white mb-6 leading-tight">
+                        Create <span class="gradient-text">Stunning</span><br>
+                        Videos Like a Pro
+                    </h1>
+                    <p class="text-xl text-gray-200 mb-8 leading-relaxed">
+                        Professional video editing tools powered by cutting-edge technology. 
+                        Transform your ideas into cinematic masterpieces with our intuitive platform.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <button class="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all transform hover:scale-105">
+                            Start Creating Free
+                        </button>
+                        <button class="glass-effect text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white hover:bg-opacity-20 transition-all">
+                            <i class="fas fa-play mr-2"></i>
+                            Watch Demo
+                        </button>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="floating-animation">
+                        <div class="glass-effect rounded-2xl p-6 mb-6">
+                            <div class="video-player aspect-video">
+                                <div class="w-full h-full bg-gradient-to-br from-blue-900 to-purple-900 flex items-center justify-center">
+                                    <div class="text-center text-white">
+                                        <i class="fas fa-play text-4xl mb-4 pulse-animation"></i>
+                                        <p class="text-lg font-semibold">Your Next Masterpiece</p>
+                                    </div>
+                                </div>
+                                <div class="control-panel absolute bottom-0 left-0 right-0 p-4">
+                                    <div class="progress-bar mb-3">
+                                        <div class="progress-fill"></div>
+                                    </div>
+                                    <div class="flex items-center justify-between text-white">
+                                        <div class="flex items-center space-x-3">
+                                            <button class="tool-button p-2 rounded"><i class="fas fa-play"></i></button>
+                                            <button class="tool-button p-2 rounded"><i class="fas fa-volume-up"></i></button>
+                                            <span class="text-sm">2:34 / 8:42</span>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <button class="tool-button p-2 rounded"><i class="fas fa-expand"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Floating Elements -->
+        <div class="absolute top-20 left-10 floating-animation opacity-20">
+            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                <i class="fas fa-cut text-blue-600"></i>
+            </div>
+        </div>
+        <div class="absolute top-40 right-20 floating-animation opacity-20" style="animation-delay: 2s;">
+            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center">
+                <i class="fas fa-magic text-purple-600"></i>
+            </div>
+        </div>
+        <div class="absolute bottom-40 left-20 floating-animation opacity-20" style="animation-delay: 4s;">
+            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                <i class="fas fa-palette text-pink-600"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16 bg-white dark:bg-gray-800 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+                <div class="space-y-2">
+                    <div class="stats-counter" data-target="2500000">0</div>
+                    <p class="text-gray-600 dark:text-gray-400 font-medium">Videos Created</p>
+                </div>
+                <div class="space-y-2">
+                    <div class="stats-counter" data-target="180000">0</div>
+                    <p class="text-gray-600 dark:text-gray-400 font-medium">Active Users</p>
+                </div>
+                <div class="space-y-2">
+                    <div class="stats-counter" data-target="95">0</div>
+                    <p class="text-gray-600 dark:text-gray-400 font-medium">Satisfaction Rate</p>
+                </div>
+                <div class="space-y-2">
+                    <div class="stats-counter" data-target="24">0</div>
+                    <p class="text-gray-600 dark:text-gray-400 font-medium">Countries Served</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-gray-50 dark:bg-gray-900 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mb-6">
+                    Powerful Features for <span class="gradient-text">Every Creator</span>
+                </h2>
+                <p class="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                    From basic cuts to advanced effects, our comprehensive toolkit empowers you to bring your vision to life.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="feature-card bg-white dark:bg-gray-800 rounded-2xl p-8 glass-effect">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-cut text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Precision Editing</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">
+                        Frame-accurate editing with advanced trimming, splitting, and merging tools for professional results.
+                    </p>
+                    <ul class="text-sm text-gray-500 dark:text-gray-500 space-y-2">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Multi-track timeline</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Ripple editing</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Keyframe animation</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card bg-white dark:bg-gray-800 rounded-2xl p-8 glass-effect">
+                    <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-magic text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">AI-Powered Effects</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">
+                        Leverage artificial intelligence for automatic color correction, noise reduction, and smart transitions.
+                    </p>
+                    <ul class="text-sm text-gray-500 dark:text-gray-500 space-y-2">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Auto color grading</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Smart stabilization</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Object removal</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card bg-white dark:bg-gray-800 rounded-2xl p-8 glass-effect">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-cloud text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Cloud Collaboration</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">
+                        Work seamlessly with your team from anywhere with real-time collaboration and version control.
+                    </p>
+                    <ul class="text-sm text-gray-500 dark:text-gray-500 space-y-2">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Real-time sync</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Comment system</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Version history</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card bg-white dark:bg-gray-800 rounded-2xl p-8 glass-effect">
+                    <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-film text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">4K+ Export</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">
+                        Export in any format you need, from web-optimized MP4 to cinema-quality ProRes.
+                    </p>
+                    <ul class="text-sm text-gray-500 dark:text-gray-500 space-y-2">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>8K resolution support</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>HDR export</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Batch processing</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card bg-white dark:bg-gray-800 rounded-2xl p-8 glass-effect">
+                    <div class="w-16 h-16 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-palette text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Color Grading</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">
+                        Professional color grading tools with LUTs, color wheels, and advanced correction features.
+                    </p>
+                    <ul class="text-sm text-gray-500 dark:text-gray-500 space-y-2">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>3-way color corrector</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Custom LUT support</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Scopes & waveforms</li>
+                    </ul>
+                </div>
+                
+                <div class="feature-card bg-white dark:bg-gray-800 rounded-2xl p-8 glass-effect">
+                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-music text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Audio Mastery</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">
+                        Complete audio post-production with mixing, mastering, and advanced audio effects.
+                    </p>
+                    <ul class="text-sm text-gray-500 dark:text-gray-500 space-y-2">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Multi-channel mixing</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Noise reduction</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Audio effects library</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Editor Demo Section -->
+    <section id="editor" class="py-20 bg-white dark:bg-gray-800 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mb-6">
+                    The Editor <span class="gradient-text">Redefined</span>
+                </h2>
+                <p class="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                    Experience our revolutionary editing interface designed for speed, precision, and creative freedom.
+                </p>
+            </div>
+            
+            <div class="bg-gray-900 rounded-2xl overflow-hidden shadow-2xl">
+                <!-- Editor Header -->
+                <div class="bg-gray-800 px-6 py-4 flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex space-x-2">
+                            <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                        </div>
+                        <span class="text-white font-medium">Untitled Project</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fas fa-save"></i>
+                        </button>
+                        <button class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fas fa-share"></i>
+                        </button>
+                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                            Export
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Editor Workspace -->
+                <div class="flex h-96">
+                    <!-- Tools Panel -->
+                    <div class="w-16 bg-gray-900 flex flex-col items-center py-4 space-y-4">
+                        <button class="tool-button w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white">
+                            <i class="fas fa-mouse-pointer"></i>
+                        </button>
+                        <button class="tool-button w-10 h-10 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700">
+                            <i class="fas fa-cut"></i>
+                        </button>
+                        <button class="tool-button w-10 h-10 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700">
+                            <i class="fas fa-magic"></i>
+                        </button>
+                        <button class="tool-button w-10 h-10 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700">
+                            <i class="fas fa-text"></i>
+                        </button>
+                        <button class="tool-button w-10 h-10 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Preview Area -->
+                    <div class="flex-1 bg-black flex items-center justify-center">
+                        <div class="text-center text-gray-400">
+                            <i class="fas fa-play-circle text-6xl mb-4"></i>
+                            <p class="text-lg">Preview Window</p>
+                            <p class="text-sm">1920 x 1080 • 29.97 fps</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Properties Panel -->
+                    <div class="w-64 bg-gray-800 p-4">
+                        <h3 class="text-white font-semibold mb-4">Properties</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-gray-400 text-sm">Duration</label>
+                                <input type="text" value="00:05:32" class="w-full bg-gray-700 text-white rounded px-3 py-2 mt-1">
+                            </div>
+                            <div>
+                                <label class="text-gray-400 text-sm">Opacity</label>
+                                <input type="range" class="w-full mt-1" value="100">
+                            </div>
+                            <div>
+                                <label class="text-gray-400 text-sm">Scale</label>
+                                <input type="range" class="w-full mt-1" value="100">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Timeline -->
+                <div class="editor-timeline p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-white font-semibold">Timeline</h3>
+                        <div class="text-gray-400 text-sm">00:00:00</div>
+                    </div>
+                    
+                    <div class="space-y-2 min-h-32">
+                        <div class="timeline-track">
+                            <div class="timeline-clip" style="left: 0%; width: 25%;">
+                                Video Track 1
+                            </div>
+                            <div class="timeline-clip" style="left: 30%; width: 40%; background: linear-gradient(135deg, #10b981, #059669);">
+                                Video Track 2
+                            </div>
+                        </div>
+                        <div class="timeline-track">
+                            <div class="timeline-clip" style="left: 0%; width: 70%; background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                Audio Track 1
+                            </div>
+                        </div>
+                        <div class="timeline-track">
+                            <div class="timeline-clip" style="left: 15%; width: 20%; background: linear-gradient(135deg, #ef4444, #dc2626);">
+                                Effects
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 bg-gray-50 dark:bg-gray-900 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mb-6">
+                    Choose Your <span class="gradient-text">Creative Journey</span>
+                </h2>
+                <p class="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                    From hobbyists to Hollywood professionals, we have the perfect plan for your creative needs.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <!-- Starter Plan -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 glass-effect feature-card relative">
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Starter</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-6">Perfect for beginners and casual creators</p>
+                        <div class="text-4xl font-black text-gray-900 dark:text-white">
+                            Free
+                        </div>
+                    </div>
+                    
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span class="text-gray-700 dark:text-gray-300">720p Export Quality</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span class="text-gray-700 dark:text-gray-300">Basic Editing Tools</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span class="text-gray-700 dark:text-gray-300">5GB Cloud Storage</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span class="text-gray-700 dark:text-gray-300">Standard Templates</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-times text-gray-400 mr-3"></i>
+                            <span class="text-gray-400">AI-Powered Effects</span>
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 py-3 rounded-xl font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                        Get Started Free
+                    </button>
+                </div>
+                
+                <!-- Pro Plan -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 glass-effect feature-card relative transform scale-105 border-2 border-blue-500">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <span class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-full text-sm font-bold">
+                            Most Popular
+                        </span>
+                    </div>
+                    
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Pro</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-6">For serious creators and small teams</p>
+                        <div class="text-4xl font-black gradient-text mb-2">
+                            $29
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-400">/month</p>
+                    </div>
+                    
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span class="text-gray-700 dark:text-gray-300">4K Export Quality</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span class="text-gray-700 dark:text-gray-300">Advanced Editing Suite</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span class="text-gray-700 dark:text-gray-300">100GB Cloud Storage</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span class="text-gray-700 dark:text-gray-300">AI-Powered Effects</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span class="text-gray-700 dark:text-gray-300">Team Collaboration</span>
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105">
+                        Start Pro Trial
+                    </button>
+                </div>
+                
+                <!-- Enterprise Plan -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 glass-effect feature-card relative">
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Enterprise</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-6">For large teams and studios</p>
+                        <div class="text-4xl font-black text-gray-900 dark:text-white mb-2">
+                            $99
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-400">/month</p>
+                    </div>
+                    
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span class="text-gray-700 dark:text-gray-300">8K Export Quality</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span class="text-gray-700 dark:text-gray-300">Complete Creative Suite</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span class="text-gray-700 dark:text-gray-300">Unlimited Cloud Storage</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span class="text-gray-700 dark:text-gray-300">Priority Support</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span class="text-gray-700 dark:text-gray-300">Custom Integrations</span>
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-3 rounded-xl font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors">
+                        Contact Sales
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-20 bg-white dark:bg-gray-800 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mb-6">
+                    Loved by <span class="gradient-text">Creators Worldwide</span>
+                </h2>
+                <p class="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                    Join thousands of satisfied creators who have transformed their workflow with VidCraft Pro.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 feature-card">
+                    <div class="flex items-center mb-6">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%23f59e0b'/%3E%3C/svg%3E" alt="Sarah Chen" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold text-gray-900 dark:text-white">Sarah Chen</h4>
+                            <p class="text-gray-600 dark:text-gray-400">Content Creator</p>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="flex text-yellow-400 mb-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="text-gray-700 dark:text-gray-300">
+                            "VidCraft Pro completely revolutionized my editing workflow. The AI features save me hours every week, and the results are incredible."
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 feature-card">
+                    <div class="flex items-center mb-6">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%2310b981'/%3E%3C/svg%3E" alt="Marcus Rodriguez" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold text-gray-900 dark:text-white">Marcus Rodriguez</h4>
+                            <p class="text-gray-600 dark:text-gray-400">Film Director</p>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="flex text-yellow-400 mb-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="text-gray-700 dark:text-gray-300">
+                            "As a professional filmmaker, I demand the best tools. VidCraft Pro delivers Hollywood-quality results with an intuitive interface."
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 feature-card">
+                    <div class="flex items-center mb-6">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%23ef4444'/%3E%3C/svg%3E" alt="Emma Thompson" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold text-gray-900 dark:text-white">Emma Thompson</h4>
+                            <p class="text-gray-600 dark:text-gray-400">Marketing Agency</p>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="flex text-yellow-400 mb-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="text-gray-700 dark:text-gray-300">
+                            "Our team collaboration has never been smoother. VidCraft Pro's cloud features make remote work seamless and efficient."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 hero-bg relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <h2 class="text-4xl lg:text-6xl font-black text-white mb-6">
+                Ready to Create Your <span class="gradient-text">Masterpiece</span>?
+            </h2>
+            <p class="text-xl text-gray-200 mb-8 max-w-3xl mx-auto">
+                Join millions of creators who trust VidCraft Pro to bring their vision to life. Start your free trial today.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button class="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all transform hover:scale-105">
+                    Start Free Trial
+                </button>
+                <button class="glass-effect text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white hover:bg-opacity-20 transition-all">
+                    Schedule Demo
+                </button>
+            </div>
+        </div>
+        
+        <!-- Animated particles -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute w-2 h-2 bg-white rounded-full opacity-20 floating-animation" style="top: 20%; left: 10%;"></div>
+            <div class="absolute w-3 h-3 bg-white rounded-full opacity-30 floating-animation" style="top: 60%; right: 15%; animation-delay: 2s;"></div>
+            <div class="absolute w-1 h-1 bg-white rounded-full opacity-40 floating-animation" style="bottom: 30%; left: 30%; animation-delay: 4s;"></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div class="md:col-span-2">
+                    <h3 class="text-3xl font-bold gradient-text mb-4">VidCraft Pro</h3>
+                    <p class="text-gray-400 mb-6 max-w-md">
+                        Empowering creators worldwide with professional-grade video editing tools that are both powerful and intuitive.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Product</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">Features</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Pricing</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Templates</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Integrations</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Support</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Tutorials</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Community</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400">&copy; 2025 VidCraft Pro. All rights reserved.</p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Cookie Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Theme Toggle Functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const html = document.documentElement;
+        
+        // Check for saved theme preference or default to light mode
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        html.classList.toggle('dark', currentTheme === 'dark');
+        updateThemeIcon(currentTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            const isDark = html.classList.contains('dark');
+            const newTheme = isDark ? 'light' : 'dark';
+            
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+        
+        function updateThemeIcon(theme) {
+            themeIcon.className = theme === 'dark' 
+                ? 'fas fa-sun text-gray-600 dark:text-gray-400' 
+                : 'fas fa-moon text-gray-600 dark:text-gray-400';
+        }
+        
+        // Three.js Background Animation
+        let scene, camera, renderer, particles;
+        
+        function initThreeJS() {
+            const canvas = document.getElementById('bg-canvas');
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            // Create particles
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = 50;
+            const posArray = new Float32Array(particlesCount * 3);
+            
+            for (let i = 0; i < particlesCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 10;
+            }
+            
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.005,
+                color: '#3b82f6',
+                transparent: true,
+                opacity: 0.3
+            });
+            
+            particles = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particles);
+            
+            camera.position.z = 3;
+            
+            animate();
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (particles) {
+                particles.rotation.x += 0.0005;
+                particles.rotation.y += 0.0005;
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+        
+        // Stats counter animation
+        function animateCounters() {
+            const counters = document.querySelectorAll('.stats-counter');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const counter = entry.target;
+                        const target = parseInt(counter.getAttribute('data-target'));
+                        const increment = target / 200;
+                        let current = 0;
+                        
+                        const updateCounter = () => {
+                            if (current < target) {
+                                current += increment;
+                                counter.textContent = Math.ceil(current).toLocaleString();
+                                requestAnimationFrame(updateCounter);
+                            } else {
+                                counter.textContent = target.toLocaleString();
+                            }
+                        };
+                        
+                        updateCounter();
+                        observer.unobserve(counter);
+                    }
+                });
+            });
+            
+            counters.forEach(counter => observer.observe(counter));
+        }
+        
+        // Timeline clip drag functionality
+        function initTimelineDrag() {
+            const clips = document.querySelectorAll('.timeline-clip');
+            let draggedElement = null;
+            let startX = 0;
+            let startLeft = 0;
+            
+            clips.forEach(clip => {
+                clip.addEventListener('mousedown', (e) => {
+                    draggedElement = clip;
+                    startX = e.clientX;
+                    startLeft = parseInt(clip.style.left) || 0;
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                });
+            });
+            
+            function onMouseMove(e) {
+                if (!draggedElement) return;
+                const deltaX = e.clientX - startX;
+                const newLeft = Math.max(0, Math.min(75, startLeft + (deltaX / 10)));
+                draggedElement.style.left = newLeft + '%';
+            }
+            
+            function onMouseUp() {
+                draggedElement = null;
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+        }
+        
+        // Video progress simulation
+        function initVideoProgress() {
+            const progressFill = document.querySelector('.progress-fill');
+            let progress = 30;
+            let direction = 1;
+            
+            setInterval(() => {
+                progress += direction * 0.5;
+                if (progress >= 100 || progress <= 0) {
+                    direction *= -1;
+                }
+                if (progressFill) {
+                    progressFill.style.width = progress + '%';
+                }
+            }, 100);
+        }
+        
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            initThreeJS();
+            animateCounters();
+            initTimelineDrag();
+            initVideoProgress();
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
+        
+        // Add scroll-based animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // Observe feature cards for scroll animations
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
