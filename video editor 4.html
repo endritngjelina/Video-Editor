@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoEdit Pro - Professional Video Editor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-bg: #0a0a0a;
+            --secondary-bg: #1a1a1a;
+            --accent-bg: #2a2a2a;
+            --primary-text: #ffffff;
+            --secondary-text: #cccccc;
+            --accent-color: #ff6b35;
+            --accent-hover: #ff8555;
+            --success-color: #00ff88;
+            --warning-color: #ffaa00;
+            --danger-color: #ff4757;
+            --border-color: #333333;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-accent: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            --shadow-primary: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="light"] {
+            --primary-bg: #ffffff;
+            --secondary-bg: #f8f9fa;
+            --accent-bg: #e9ecef;
+            --primary-text: #212529;
+            --secondary-text: #6c757d;
+            --border-color: #dee2e6;
+            --shadow-primary: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--primary-bg);
+            color: var(--primary-text);
+            overflow-x: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        [data-theme="light"] .navbar {
+            background: rgba(248, 249, 250, 0.95);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--secondary-text);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-color);
+        }
+
+        .theme-toggle {
+            background: var(--accent-bg);
+            border: 1px solid var(--border-color);
+            color: var(--primary-text);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--accent-color);
+            transform: scale(1.05);
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .hero-content {
+            z-index: 2;
+            max-width: 800px;
+            padding: 2rem;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: var(--secondary-text);
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .cta-button {
+            background: var(--gradient-accent);
+            color: white;
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-primary);
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* Editor Interface */
+        .editor-container {
+            min-height: 100vh;
+            background: var(--secondary-bg);
+            padding: 6rem 0 2rem;
+            display: none;
+        }
+
+        .editor-header {
+            background: var(--accent-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .editor-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .editor-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .control-btn {
+            background: var(--primary-bg);
+            border: 1px solid var(--border-color);
+            color: var(--primary-text);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-btn:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .editor-main {
+            display: grid;
+            grid-template-columns: 250px 1fr 300px;
+            height: calc(100vh - 140px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--accent-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+
+        .tool-item {
+            background: var(--primary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tool-item:hover {
+            background: var(--accent-color);
+            transform: translateX(5px);
+        }
+
+        /* Viewport */
+        .viewport {
+            background: var(--primary-bg);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .viewport-header {
+            background: var(--accent-bg);
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .viewport-content {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(45deg, #1a1a1a 25%, transparent 25%),
+                        linear-gradient(-45deg, #1a1a1a 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, #1a1a1a 75%),
+                        linear-gradient(-45deg, transparent 75%, #1a1a1a 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        [data-theme="light"] .viewport-content {
+            background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
+                        linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
+                        linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        .video-canvas {
+            background: #000;
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow-primary);
+        }
+
+        /* Properties Panel */
+        .properties {
+            background: var(--accent-bg);
+            border-left: 1px solid var(--border-color);
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .property-group {
+            background: var(--primary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .property-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+
+        .property-item {
+            margin-bottom: 1rem;
+        }
+
+        .property-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--secondary-text);
+        }
+
+        .property-input {
+            width: 100%;
+            background: var(--accent-bg);
+            border: 1px solid var(--border-color);
+            color: var(--primary-text);
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .property-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
+        }
+
+        .color-picker {
+            width: 100%;
+            height: 40px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Timeline */
+        .timeline-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: var(--accent-bg);
+            border-top: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .timeline-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .timeline-content {
+            height: calc(100% - 60px);
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        .timeline-track {
+            background: var(--primary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            height: 40px;
+            margin-bottom: 0.5rem;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+        }
+
+        .timeline-clip {
+            background: var(--gradient-accent);
+            height: 30px;
+            border-radius: 4px;
+            margin: 0 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            cursor: move;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-clip:hover {
+            transform: scale(1.05);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 5rem 2rem;
+            background: var(--secondary-bg);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--accent-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .feature-card:hover::before {
+            left: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .feature-description {
+            color: var(--secondary-text);
+            line-height: 1.6;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--accent-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--secondary-text);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: var(--accent-color);
+        }
+
+        /* File Upload */
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent-color);
+            background: rgba(255, 107, 53, 0.05);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--accent-color);
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--accent-bg);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-accent);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .editor-main {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+            }
+            
+            .sidebar, .properties {
+                height: auto;
+                max-height: 200px;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .navbar {
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+            }
+        }
+
+        /* Utility Classes */
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .justify-center { justify-content: center; }
+        .items-center { align-items: center; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-4 { gap: 1rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .p-2 { padding: 0.5rem; }
+        .p-4 { padding: 1rem; }
+        .text-center { text-align: center; }
+        .text-sm { font-size: 0.875rem; }
+        .font-bold { font-weight: bold; }
+        .cursor-pointer { cursor: pointer; }
+        .opacity-50 { opacity: 0.5; }
+    </style>
+</head>
+<body data-theme="dark">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">VideoEdit Pro</div>
+        <div class="nav-links">
+            <a href="#" class="nav-link" onclick="showSection('hero')">Home</a>
+            <a href="#" class="nav-link" onclick="showSection('features')">Features</a>
+            <a href="#" class="nav-link" onclick="showEditor()">Editor</a>
+            <a href="#" class="nav-link">Export</a>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero-section">
+        <div class="hero-bg" id="hero-bg"></div>
+        <div class="hero-content">
+            <h1>Professional Video Editing</h1>
+            <p>Create stunning videos with our advanced editing suite. Powered by cutting-edge technology and designed for professionals.</p>
+            <button class="cta-button pulse" onclick="showEditor()">
+                <i class="fas fa-play"></i> Start Editing
+            </button>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features hidden" id="features-section">
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-cut"></i></div>
+                <h3 class="feature-title">Precision Editing</h3>
+                <p class="feature-description">Frame-perfect editing with advanced trimming and cutting tools for professional results.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-magic"></i></div>
+                <h3 class="feature-title">Visual Effects</h3>
+                <p class="feature-description">Stunning visual effects and transitions powered by GPU acceleration and Three.js.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-volume-up"></i></div>
+                <h3 class="feature-title">Audio Mastering</h3>
+                <p class="feature-description">Professional audio editing with multi-track support and real-time effects.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-palette"></i></div>
+                <h3 class="feature-title">Color Grading</h3>
+                <p class="feature-description">Advanced color correction and grading tools for cinematic looks.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-rocket"></i></div>
+                <h3 class="feature-title">Fast Rendering</h3>
+                <p class="feature-description">Hardware-accelerated rendering for quick exports and real-time previews.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-cloud"></i></div>
+                <h3 class="feature-title">Cloud Sync</h3>
+                <p class="feature-description">Seamless cloud integration for project backup and collaboration.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Editor Interface -->
+    <div class="editor-container" id="editor-container">
+        <div class="editor-header">
+            <div class="editor-title">
+                <i class="fas fa-video"></i> Untitled Project
+            </div>
+            <div class="editor-controls">
+                <button class="control-btn" onclick="showModal('import-modal')">
+                    <i class="fas fa-file-import"></i> Import
+                </button>
+                <button class="control-btn" onclick="showModal('export-modal')">
+                    <i class="fas fa-file-export"></i> Export
+                </button>
+                <button class="control-btn" onclick="saveProject()">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <button class="control-btn" onclick="showTimeline()">
+                    <i class="fas fa-film"></i> Timeline
+                </button>
+            </div>
+        </div>
+
+        <div class="editor-main">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Tools</div>
+                    <div class="tool-item" onclick="selectTool('select')">
+                        <i class="fas fa-mouse-pointer"></i> Select
+                    </div>
+                    <div class="tool-item" onclick="selectTool('cut')">
+                        <i class="fas fa-cut"></i> Cut
+                    </div>
+                    <div class="tool-item" onclick="selectTool('text')">
+                        <i class="fas fa-font"></i> Text
+                    </div>
+                    <div class="tool-item" onclick="selectTool('effects')">
+                        <i class="fas fa-magic"></i> Effects
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Media</div>
+                    <div class="tool-item" onclick="showModal('import-modal')">
+                        <i class="fas fa-plus"></i> Add Media
+                    </div>
+                    <div id="media-list"></div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Effects</div>
+                    <div class="tool-item" onclick="addEffect('blur')">
+                        <i class="fas fa-eye-slash"></i> Blur
+                    </div>
+                    <div class="tool-item" onclick="addEffect('glow')">
+                        <i class="fas fa-sun"></i> Glow
+                    </div>
+                    <div class="tool-item" onclick="addEffect('vintage')">
+                        <i class="fas fa-film"></i> Vintage
+                    </div>
+                </div>
+            </div>
+
+            <!-- Viewport -->
+            <div class="viewport">
+                <div class="viewport-header">
+                    <div>
+                        <span>Preview</span>
+                        <select class="property-input" style="width: auto; margin-left: 1rem;">
+                            <option>100%</option>
+                            <option>75%</option>
+                            <option>50%</option>
+                            <option>25%</option>
+                        </select>
+                    </div>
+                    <div class="editor-controls">
+                        <button class="control-btn" onclick="playPause()">
+                            <i class="fas fa-play" id="play-icon"></i>
+                        </button>
+                        <button class="control-btn" onclick="stop()">
+                            <i class="fas fa-stop"></i>
+                        </button>
+                        <span id="timecode">00:00:00</span>
+                    </div>
+                </div>
+                <div class="viewport-content">
+                    <canvas class="video-canvas" id="video-canvas" width="640" height="360"></canvas>
+                </div>
+            </div>
+
+            <!-- Properties Panel -->
+            <div class="properties">
+                <div class="property-group">
+                    <div class="property-title">Transform</div>
+                    <div class="property-item">
+                        <label class="property-label">Position X</label>
+                        <input type="number" class="property-input" value="0" onchange="updateProperty('posX', this.value)">
+                    </div>
+                    <div class="property-item">
+                        <label class="property-label">Position Y</label>
+                        <input type="number" class="property-input" value="0" onchange="updateProperty('posY', this.value)">
+                    </div>
+                    <div class="property-item">
+                        <label class="property-label">Scale</label>
+                        <input type="range" class="property-input" min="0.1" max="3" step="0.1" value="1" onchange="updateProperty('scale', this.value)">
+                    </div>
+                    <div class="property-item">
+                        <label class="property-label">Rotation</label>
+                        <input type="range" class="property-input" min="0" max="360" value="0" onchange="updateProperty('rotation', this.value)">
+                    </div>
+                </div>
+
+                <div class="property-group">
+                    <div class="property-title">Color</div>
+                    <div class="property-item">
+                        <label class="property-label">Brightness</label>
+                        <input type="range" class="property-input" min="-100" max="100" value="0" onchange="updateProperty('brightness', this.value)">
+                    </div>
+                    <div class="property-item">
+                        <label class="property-label">Contrast</label>
+                        <input type="range" class="property-input" min="-100" max="100" value="0" onchange="updateProperty('contrast', this.value)">
+                    </div>
+                    <div class="property-item">
+                        <label class="property-label">Saturation</label>
+                        <input type="range" class="property-input" min="-100" max="100" value="0" onchange="updateProperty('saturation', this.value)">
+                    </div>
+                    <div class="property-item">
+                        <label class="property-label">Tint</label>
+                        <input type="color" class="color-picker" value="#ffffff" onchange="updateProperty('tint', this.value)">
+                    </div>
+                </div>
+
+                <div class="property-group">
+                    <div class="property-title">Text</div>
+                    <div class="property-item">
+                        <label class="property-label">Content</label>
+                        <textarea class="property-input" rows="3" placeholder="Enter text..." onchange="updateProperty('text', this.value)"></textarea>
+                    </div>
+                    <div class="property-item">
+                        <label class="property-label">Font Size</label>
+                        <input type="number" class="property-input" value="24" min="8" max="144" onchange="updateProperty('fontSize', this.value)">
+                    </div>
+                    <div class="property-item">
+                        <label class="property-label">Font Color</label>
+                        <input type="color" class="color-picker" value="#ffffff" onchange="updateProperty('fontColor', this.value)">
+                    </div>
+                </div>
+
+                <div class="property-group">
+                    <div class="property-title">Audio</div>
+                    <div class="property-item">
+                        <label class="property-label">Volume</label>
+                        <input type="range" class="property-input" min="0" max="200" value="100" onchange="updateProperty('volume', this.value)">
+                    </div>
+                    <div class="property-item">
+                        <label class="property-label">Fade In</label>
+                        <input type="number" class="property-input" value="0" min="0" max="10" step="0.1" onchange="updateProperty('fadeIn', this.value)">
+                    </div>
+                    <div class="property-item">
+                        <label class="property-label">Fade Out</label>
+                        <input type="number" class="property-input" value="0" min="0" max="10" step="0.1" onchange="updateProperty('fadeOut', this.value)">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline-container" id="timeline-container">
+        <div class="timeline-header">
+            <div class="sidebar-title">Timeline</div>
+            <div class="editor-controls">
+                <button class="control-btn" onclick="addTrack()">
+                    <i class="fas fa-plus"></i> Add Track
+                </button>
+                <button class="control-btn" onclick="hideTimeline()">
+                    <i class="fas fa-times"></i> Hide
+                </button>
+            </div>
+        </div>
+        <div class="timeline-content" id="timeline-content">
+            <div class="timeline-track">
+                <span>Video Track 1</span>
+                <div class="timeline-clip" style="width: 120px; margin-left: 10px;">
+                    Video Clip 1
+                </div>
+                <div class="timeline-clip" style="width: 80px; margin-left: 140px;">
+                    Video Clip 2
+                </div>
+            </div>
+            <div class="timeline-track">
+                <span>Audio Track 1</span>
+                <div class="timeline-clip" style="width: 200px; margin-left: 10px; background: var(--gradient-primary);">
+                    Audio Track
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal" id="import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Import Media</h3>
+                <button class="close-btn" onclick="hideModal('import-modal')">&times;</button>
+            </div>
+            <div class="upload-area" id="upload-area" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--accent-color); margin-bottom: 1rem;"></i>
+                <p>Drag & drop your files here or click to browse</p>
+                <p class="text-sm opacity-50">Supports MP4, MOV, AVI, MP3, WAV, JPG, PNG</p>
+                <input type="file" id="file-input" multiple accept="video/*,audio/*,image/*" style="display: none;" onchange="handleFileSelect(event)">
+            </div>
+            <div class="progress-bar hidden" id="upload-progress">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="flex justify-center gap-4">
+                <button class="control-btn" onclick="document.getElementById('file-input').click()">
+                    <i class="fas fa-folder-open"></i> Browse Files
+                </button>
+                <button class="control-btn" onclick="importFromUrl()">
+                    <i class="fas fa-link"></i> Import from URL
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal" id="export-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Export Video</h3>
+                <button class="close-btn" onclick="hideModal('export-modal')">&times;</button>
+            </div>
+            <div class="property-item">
+                <label class="property-label">Format</label>
+                <select class="property-input">
+                    <option value="mp4">MP4 (H.264)</option>
+                    <option value="webm">WebM</option>
+                    <option value="mov">MOV</option>
+                    <option value="avi">AVI</option>
+                </select>
+            </div>
+            <div class="property-item">
+                <label class="property-label">Quality</label>
+                <select class="property-input">
+                    <option value="4k">4K (3840x2160)</option>
+                    <option value="1080p" selected>1080p (1920x1080)</option>
+                    <option value="720p">720p (1280x720)</option>
+                    <option value="480p">480p (854x480)</option>
+                </select>
+            </div>
+            <div class="property-item">
+                <label class="property-label">Frame Rate</label>
+                <select class="property-input">
+                    <option value="24">24 fps</option>
+                    <option value="30" selected>30 fps</option>
+                    <option value="60">60 fps</option>
+                </select>
+            </div>
+            <div class="progress-bar hidden" id="export-progress">
+                <div class="progress-fill" id="export-progress-fill"></div>
+            </div>
+            <div class="flex justify-center gap-4">
+                <button class="control-btn" onclick="startExport()">
+                    <i class="fas fa-download"></i> Export Video
+                </button>
+                <button class="control-btn" onclick="hideModal('export-modal')">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global Variables
+        let scene, camera, renderer, animationId;
+        let isPlaying = false;
+        let currentTime = 0;
+        let selectedTool = 'select';
+        let currentProject = {
+            name: 'Untitled Project',
+            tracks: [],
+            effects: [],
+            properties: {}
+        };
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function() {
+            initThreeJS();
+            initEventListeners();
+            animateBackground();
+        });
+
+        // Theme Toggle
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.setAttribute('data-theme', 'light');
+                themeIcon.className = 'fas fa-sun';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.className = 'fas fa-moon';
+            }
+        }
+
+        // Three.js Background Animation
+        function initThreeJS() {
+            const heroBackground = document.getElementById('hero-bg');
+            
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000000, 0);
+            heroBackground.appendChild(renderer.domElement);
+
+            // Create particle system
+            const particleCount = 1000;
+            const particles = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+
+            for (let i = 0; i < particleCount * 3; i += 3) {
+                positions[i] = (Math.random() - 0.5) * 100;
+                positions[i + 1] = (Math.random() - 0.5) * 100;
+                positions[i + 2] = (Math.random() - 0.5) * 100;
+
+                const color = new THREE.Color();
+                color.setHSL(Math.random() * 0.2 + 0.05, 0.8, 0.6);
+                colors[i] = color.r;
+                colors[i + 1] = color.g;
+                colors[i + 2] = color.b;
+            }
+
+            particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const particleMaterial = new THREE.PointsMaterial({
+                size: 2,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8
+            });
+
+            const particleSystem = new THREE.Points(particles, particleMaterial);
+            scene.add(particleSystem);
+
+            camera.position.z = 50;
+
+            // Animation loop
+            function animate() {
+                animationId = requestAnimationFrame(animate);
+                
+                particleSystem.rotation.x += 0.001;
+                particleSystem.rotation.y += 0.002;
+                
+                const positions = particleSystem.geometry.attributes.position.array;
+                for (let i = 0; i < positions.length; i += 3) {
+                    positions[i + 1] += Math.sin(Date.now() * 0.001 + positions[i]) * 0.01;
+                }
+                particleSystem.geometry.attributes.position.needsUpdate = true;
+                
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        function animateBackground() {
+            if (typeof gsap !== 'undefined') {
+                gsap.to('.hero-content', {
+                    y: -20,
+                    duration: 3,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "power2.inOut"
+                });
+            }
+        }
+
+        // Section Management
+        function showSection(sectionName) {
+            const sections = ['hero-section', 'features-section'];
+            sections.forEach(section => {
+                document.getElementById(section).classList.add('hidden');
+            });
+            document.getElementById('editor-container').style.display = 'none';
+            
+            if (sectionName === 'features') {
+                document.getElementById('features-section').classList.remove('hidden');
+            } else {
+                document.getElementById('hero-section').classList.remove('hidden');
+            }
+        }
+
+        function showEditor() {
+            document.getElementById('hero-section').classList.add('hidden');
+            document.getElementById('features-section').classList.add('hidden');
+            document.getElementById('editor-container').style.display = 'block';
+            initVideoCanvas();
+        }
+
+        // Video Canvas Initialization
+        function initVideoCanvas() {
+            const canvas = document.getElementById('video-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Draw placeholder content
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < canvas.width; x += 32) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += 32) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // Draw center text
+            ctx.fillStyle = '#ff6b35';
+            ctx.font = '24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Video Preview', canvas.width / 2, canvas.height / 2);
+            ctx.fillStyle = '#ccc';
+            ctx.font = '14px Arial';
+            ctx.fillText('Import media to start editing', canvas.width / 2, canvas.height / 2 + 30);
+        }
+
+        // Tool Selection
+        function selectTool(tool) {
+            selectedTool = tool;
+            const toolItems = document.querySelectorAll('.tool-item');
+            toolItems.forEach(item => item.classList.remove('active'));
+            event.target.closest('.tool-item').classList.add('active');
+            
+            // Update cursor or UI based on selected tool
+            const canvas = document.getElementById('video-canvas');
+            switch(tool) {
+                case 'select':
+                    canvas.style.cursor = 'default';
+                    break;
+                case 'cut':
+                    canvas.style.cursor = 'crosshair';
+                    break;
+                case 'text':
+                    canvas.style.cursor = 'text';
+                    break;
+                case 'effects':
+                    canvas.style.cursor = 'pointer';
+                    break;
+            }
+        }
+
+        // Property Updates
+        function updateProperty(property, value) {
+            currentProject.properties[property] = value;
+            
+            // Apply real-time updates to canvas
+            const canvas = document.getElementById('video-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Re-render with new properties
+            renderCanvas();
+            
+            console.log(`Updated ${property} to ${value}`);
+        }
+
+        function renderCanvas() {
+            const canvas = document.getElementById('video-canvas');
+            const ctx = canvas.getContext('2d');
+            const props = currentProject.properties;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Apply transformations
+            ctx.save();
+            ctx.translate(canvas.width / 2 + (props.posX || 0), canvas.height / 2 + (props.posY || 0));
+            ctx.scale(props.scale || 1, props.scale || 1);
+            ctx.rotate((props.rotation || 0) * Math.PI / 180);
+            
+            // Apply filters
+            let filters = [];
+            if (props.brightness) filters.push(`brightness(${100 + parseInt(props.brightness)}%)`);
+            if (props.contrast) filters.push(`contrast(${100 + parseInt(props.contrast)}%)`);
+            if (props.saturation) filters.push(`saturate(${100 + parseInt(props.saturation)}%)`);
+            ctx.filter = filters.join(' ');
+            
+            // Redraw content
+            initVideoCanvas();
+            
+            ctx.restore();
+        }
+
+        // Timeline Management
+        function showTimeline() {
+            document.getElementById('timeline-container').style.display = 'block';
+            document.getElementById('editor-container').style.paddingBottom = '200px';
+        }
+
+        function hideTimeline() {
+            document.getElementById('timeline-container').style.display = 'none';
+            document.getElementById('editor-container').style.paddingBottom = '2rem';
+        }
+
+        function addTrack() {
+            const timeline = document.getElementById('timeline-content');
+            const trackCount = timeline.children.length + 1;
+            
+            const newTrack = document.createElement('div');
+            newTrack.className = 'timeline-track';
+            newTrack.innerHTML = `<span>Track ${trackCount}</span>`;
+            
+            timeline.appendChild(newTrack);
+        }
+
+        // Playback Controls
+        function playPause() {
+            const playIcon = document.getElementById('play-icon');
+            
+            if (isPlaying) {
+                playIcon.className = 'fas fa-play';
+                isPlaying = false;
+                clearInterval(window.playbackTimer);
+            } else {
+                playIcon.className = 'fas fa-pause';
+                isPlaying = true;
+                
+                window.playbackTimer = setInterval(() => {
+                    currentTime += 0.1;
+                    updateTimecode();
+                }, 100);
+            }
+        }
+
+        function stop() {
+            const playIcon = document.getElementById('play-icon');
+            playIcon.className = 'fas fa-play';
+            isPlaying = false;
+            currentTime = 0;
+            clearInterval(window.playbackTimer);
+            updateTimecode();
+        }
+
+        function updateTimecode() {
+            const timecode = document.getElementById('timecode');
+            const hours = Math.floor(currentTime / 3600);
+            const minutes = Math.floor((currentTime % 3600) / 60);
+            const seconds = Math.floor(currentTime % 60);
+            
+            timecode.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Modal Management
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // File Handling
+        function handleDrop(e) {
+            e.preventDefault();
+            const uploadArea = document.getElementById('upload-area');
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            processFiles(files);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.getElementById('upload-area').classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            document.getElementById('upload-area').classList.remove('dragover');
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            processFiles(files);
+        }
+
+        function processFiles(files) {
+            const progressBar = document.getElementById('upload-progress');
+            const progressFill = document.getElementById('progress-fill');
+            
+            progressBar.classList.remove('hidden');
+            
+            Array.from(files).forEach((file, index) => {
+                setTimeout(() => {
+                    const progress = ((index + 1) / files.length) * 100;
+                    progressFill.style.width = progress + '%';
+                    
+                    // Add file to media list
+                    addToMediaList(file);
+                    
+                    if (index === files.length - 1) {
+                        setTimeout(() => {
+                            progressBar.classList.add('hidden');
+                            hideModal('import-modal');
+                        }, 500);
+                    }
+                }, index * 200);
+            });
+        }
+
+        function addToMediaList(file) {
+            const mediaList = document.getElementById('media-list');
+            const mediaItem = document.createElement('div');
+            mediaItem.className = 'tool-item';
+            mediaItem.innerHTML = `
+                <i class="fas fa-${getFileIcon(file.type)}"></i>
+                <span>${file.name}</span>
+            `;
+            mediaItem.onclick = () => addToTimeline(file);
+            mediaList.appendChild(mediaItem);
+        }
+
+        function getFileIcon(fileType) {
+            if (fileType.startsWith('video/')) return 'video';
+            if (fileType.startsWith('audio/')) return 'music';
+            if (fileType.startsWith('image/')) return 'image';
+            return 'file';
+        }
+
+        function addToTimeline(file) {
+            const timeline = document.getElementById('timeline-content');
+            const firstTrack = timeline.querySelector('.timeline-track');
+            
+            if (firstTrack) {
+                const clip = document.createElement('div');
+                clip.className = 'timeline-clip';
+                clip.style.width = '100px';
+                clip.style.marginLeft = '10px';
+                clip.textContent = file.name.substring(0, 10) + '...';
+                firstTrack.appendChild(clip);
+            }
+        }
+
+        // Effects
+        function addEffect(effectType) {
+            const canvas = document.getElementById('video-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            switch(effectType) {
+                case 'blur':
+                    ctx.filter = 'blur(2px)';
+                    break;
+                case 'glow':
+                    ctx.shadowColor = '#ff6b35';
+                    ctx.shadowBlur = 20;
+                    break;
+                case 'vintage':
+                    ctx.filter = 'sepia(1) contrast(1.2) brightness(0.8)';
+                    break;
+            }
+            
+            renderCanvas();
+        }
+
+        // Project Management
+        function saveProject() {
+            const projectData = JSON.stringify(currentProject);
+            const blob = new Blob([projectData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = currentProject.name + '.json';
+            a.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        // Export Functions
+        function startExport() {
+            const progressBar = document.getElementById('export-progress');
+            const progressFill = document.getElementById('export-progress-fill');
+            
+            progressBar.classList.remove('hidden');
+            
+            let progress = 0;
+            const exportTimer = setInterval(() => {
+                progress += Math.random() * 10;
+                progressFill.style.width = Math.min(progress, 100) + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(exportTimer);
+                    setTimeout(() => {
+                        progressBar.classList.add('hidden');
+                        hideModal('export-modal');
+                        alert('Export completed successfully!');
+                    }, 500);
+                }
+            }, 200);
+        }
+
+        function importFromUrl() {
+            const url = prompt('Enter media URL:');
+            if (url) {
+                // Simulate URL import
+                const fakeFile = { name: 'URL_Media.mp4', type: 'video/mp4' };
+                addToMediaList(fakeFile);
+                hideModal('import-modal');
+            }
+        }
+
+        // Event Listeners
+        function initEventListeners() {
+            // Window resize
+            window.addEventListener('resize', () => {
+                if (renderer) {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                }
+            });
+
+            // Canvas interactions
+            const canvas = document.getElementById('video-canvas');
+            canvas.addEventListener('click', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                if (selectedTool === 'text') {
+                    addTextElement(x, y);
+                }
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key) {
+                        case 's':
+                            e.preventDefault();
+                            saveProject();
+                            break;
+                        case 'i':
+                            e.preventDefault();
+                            showModal('import-modal');
+                            break;
+                        case 'e':
+                            e.preventDefault();
+                            showModal('export-modal');
+                            break;
+                    }
+                }
+                
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    playPause();
+                }
+            });
+
+            // Click outside modal to close
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    e.target.classList.remove('active');
+                }
+            });
+        }
+
+        function addTextElement(x, y) {
+            const canvas = document.getElementById('video-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = currentProject.properties.fontColor || '#ffffff';
+            ctx.font = `${currentProject.properties.fontSize || 24}px Arial`;
+            ctx.fillText(currentProject.properties.text || 'Sample Text', x, y);
+        }
+
+        // Initialize timecode display
+        updateTimecode();
+    </script>
+</body>
+</html>
