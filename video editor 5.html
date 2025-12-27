@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisuaLux Studios - Premium Video Editing Services</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'neon-blue': '#00D4FF',
+                        'neon-purple': '#8B5CF6',
+                        'neon-pink': '#EC4899',
+                        'dark-slate': '#0F172A',
+                        'dark-gray': '#1E293B'
+                    },
+                    fontFamily: {
+                        'cinematic': ['Orbitron', 'sans-serif'],
+                        'elegant': ['Poppins', 'sans-serif']
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'slide-up': 'slideUp 0.8s ease-out',
+                        'fade-in': 'fadeIn 1s ease-out',
+                        'bounce-slow': 'bounce 3s infinite',
+                        'pulse-slow': 'pulse 3s infinite'
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #00D4FF, 0 0 20px #00D4FF, 0 0 30px #00D4FF; }
+            to { text-shadow: 0 0 20px #8B5CF6, 0 0 30px #8B5CF6, 0 0 40px #8B5CF6; }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .gradient-text {
+            background: linear-gradient(45deg, #00D4FF, #8B5CF6, #EC4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .video-frame {
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 212, 255, 0.3);
+        }
+        .video-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(0, 212, 255, 0.1), transparent);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .portfolio-item {
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .portfolio-item:hover {
+            transform: translateY(-10px) scale(1.02);
+        }
+        .service-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        .service-card:hover::before {
+            left: 100%;
+        }
+        .pricing-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .pricing-card.featured {
+            transform: scale(1.05);
+            border: 2px solid #00D4FF;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+        }
+        .contact-form {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+        }
+        #three-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .parallax-element {
+            transform: translateZ(0);
+            will-change: transform;
+        }
+        .scroll-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #00D4FF, #8B5CF6, #EC4899);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .floating-shape {
+            position: absolute;
+            background: linear-gradient(45deg, rgba(0, 212, 255, 0.1), rgba(139, 92, 246, 0.1));
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+        }
+        .typewriter {
+            overflow: hidden;
+            border-right: 0.15em solid #00D4FF;
+            white-space: nowrap;
+            margin: 0 auto;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: #00D4FF; }
+        }
+        .nav-item {
+            position: relative;
+            overflow: hidden;
+        }
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00D4FF, #8B5CF6);
+            transition: width 0.3s ease;
+        }
+        .nav-item:hover::after {
+            width: 100%;
+        }
+        .timeline-item {
+            position: relative;
+            padding-left: 40px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(180deg, #00D4FF, #8B5CF6, #EC4899);
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 20px;
+            width: 15px;
+            height: 15px;
+            background: #00D4FF;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00D4FF;
+        }
+    </style>
+</head>
+<body class="bg-dark-slate text-white overflow-x-hidden">
+    <div id="three-container"></div>
+    <div class="scroll-indicator"></div>
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-effect transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 bg-gradient-to-r from-neon-blue to-neon-purple rounded-lg flex items-center justify-center">
+                        <i class="fas fa-video text-white text-xl"></i>
+                    </div>
+                    <span class="font-cinematic text-2xl font-bold gradient-text">VisuaLux</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#home" class="nav-item hover:text-neon-blue transition-colors">Home</a>
+                    <a href="#about" class="nav-item hover:text-neon-blue transition-colors">About</a>
+                    <a href="#services" class="nav-item hover:text-neon-blue transition-colors">Services</a>
+                    <a href="#portfolio" class="nav-item hover:text-neon-blue transition-colors">Portfolio</a>
+                    <a href="#pricing" class="nav-item hover:text-neon-blue transition-colors">Pricing</a>
+                    <a href="#contact" class="nav-item hover:text-neon-blue transition-colors">Contact</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-2xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="fixed top-0 left-0 w-full h-full bg-dark-slate z-40 transform -translate-x-full transition-transform duration-300">
+        <div class="flex flex-col items-center justify-center h-full space-y-8 text-2xl">
+            <a href="#home" class="mobile-menu-item hover:text-neon-blue transition-colors">Home</a>
+            <a href="#about" class="mobile-menu-item hover:text-neon-blue transition-colors">About</a>
+            <a href="#services" class="mobile-menu-item hover:text-neon-blue transition-colors">Services</a>
+            <a href="#portfolio" class="mobile-menu-item hover:text-neon-blue transition-colors">Portfolio</a>
+            <a href="#pricing" class="mobile-menu-item hover:text-neon-blue transition-colors">Pricing</a>
+            <a href="#contact" class="mobile-menu-item hover:text-neon-blue transition-colors">Contact</a>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section id="home" class="min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div class="floating-elements">
+            <div class="floating-shape w-20 h-20 top-20 left-20" style="animation-delay: 0s;"></div>
+            <div class="floating-shape w-32 h-32 top-40 right-32" style="animation-delay: 2s;"></div>
+            <div class="floating-shape w-16 h-16 bottom-40 left-1/4" style="animation-delay: 4s;"></div>
+            <div class="floating-shape w-24 h-24 bottom-20 right-20" style="animation-delay: 6s;"></div>
+        </div>
+        <div class="text-center z-10 px-6">
+            <h1 class="font-cinematic text-6xl md:text-8xl font-bold mb-6 animate-slide-up">
+                <span class="gradient-text animate-glow">VisuaLux</span>
+            </h1>
+            <h2 class="font-elegant text-2xl md:text-4xl mb-8 typewriter">
+                Cinematic Video Editing Excellence
+            </h2>
+            <p class="text-xl md:text-2xl mb-12 max-w-4xl mx-auto animate-fade-in opacity-80">
+                Transform your vision into breathtaking visual stories. From corporate presentations to cinematic masterpieces, we bring your content to life with cutting-edge editing techniques and artistic flair.
+            </p>
+            <div class="flex flex-col md:flex-row gap-6 justify-center items-center">
+                <button class="bg-gradient-to-r from-neon-blue to-neon-purple px-10 py-4 rounded-full font-semibold text-lg hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-neon-blue/50">
+                    Start Your Project
+                </button>
+                <button class="border-2 border-neon-blue px-10 py-4 rounded-full font-semibold text-lg hover:bg-neon-blue hover:text-dark-slate transition-all duration-300">
+                    View Portfolio
+                </button>
+            </div>
+        </div>
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <i class="fas fa-chevron-down text-3xl text-neon-blue"></i>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 px-6">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="font-cinematic text-5xl font-bold mb-6 gradient-text">About VisuaLux Studios</h2>
+                <p class="text-xl max-w-3xl mx-auto opacity-80">
+                    Where creativity meets technical excellence in the art of visual storytelling
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-16 items-center">
+                <div class="space-y-8">
+                    <div class="timeline-item">
+                        <h3 class="text-2xl font-bold mb-4 text-neon-blue">Creative Vision</h3>
+                        <p class="text-lg opacity-80">
+                            With over a decade of experience in video production and post-production, we understand that every frame tells a story. Our team combines artistic vision with technical expertise to create compelling visual narratives.
+                        </p>
+                    </div>
+                    <div class="timeline-item">
+                        <h3 class="text-2xl font-bold mb-4 text-neon-purple">Technical Excellence</h3>
+                        <p class="text-lg opacity-80">
+                            Using industry-leading software and cutting-edge techniques, we deliver pristine 4K and 8K content that meets the highest professional standards. From color grading to motion graphics, every detail is perfected.
+                        </p>
+                    </div>
+                    <div class="timeline-item">
+                        <h3 class="text-2xl font-bold mb-4 text-neon-pink">Client Partnership</h3>
+                        <p class="text-lg opacity-80">
+                            We believe in collaborative creativity. Your vision combined with our expertise results in content that not only meets but exceeds expectations, delivered on time and within budget.
+                        </p>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="video-frame aspect-video bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 rounded-3xl flex items-center justify-center">
+                        <div class="text-center">
+                            <i class="fas fa-play-circle text-6xl text-neon-blue mb-4 animate-pulse-slow"></i>
+                            <p class="text-xl font-semibold">Studio Showcase</p>
+                            <p class="opacity-60">Click to see our workspace</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-20 px-6 bg-dark-gray/50">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="font-cinematic text-5xl font-bold mb-6 gradient-text">Our Services</h2>
+                <p class="text-xl max-w-3xl mx-auto opacity-80">
+                    Comprehensive video editing solutions for every creative need
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="service-card glass-effect rounded-2xl p-8 hover:scale-105 transition-all duration-300">
+                    <div class="w-16 h-16 bg-gradient-to-r from-neon-blue to-neon-purple rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-cut text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-neon-blue">Video Editing</h3>
+                    <p class="opacity-80 mb-6">
+                        Professional editing services including cutting, splicing, transitions, and narrative flow optimization for maximum impact.
+                    </p>
+                    <ul class="space-y-2 text-sm opacity-70">
+                        <li>• Multi-camera editing</li>
+                        <li>• Narrative structure</li>
+                        <li>• Seamless transitions</li>
+                        <li>• Audio synchronization</li>
+                    </ul>
+                </div>
+                <div class="service-card glass-effect rounded-2xl p-8 hover:scale-105 transition-all duration-300">
+                    <div class="w-16 h-16 bg-gradient-to-r from-neon-purple to-neon-pink rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-palette text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-neon-purple">Color Grading</h3>
+                    <p class="opacity-80 mb-6">
+                        Transform your footage with cinematic color grading that enhances mood, atmosphere, and visual storytelling.
+                    </p>
+                    <ul class="space-y-2 text-sm opacity-70">
+                        <li>• Cinema-quality grading</li>
+                        <li>• Mood enhancement</li>
+                        <li>• Brand consistency</li>
+                        <li>• HDR optimization</li>
+                    </ul>
+                </div>
+                <div class="service-card glass-effect rounded-2xl p-8 hover:scale-105 transition-all duration-300">
+                    <div class="w-16 h-16 bg-gradient-to-r from-neon-pink to-neon-blue rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-magic text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-neon-pink">Motion Graphics</h3>
+                    <p class="opacity-80 mb-6">
+                        Dynamic motion graphics, titles, and visual effects that captivate audiences and reinforce your brand identity.
+                    </p>
+                    <ul class="space-y-2 text-sm opacity-70">
+                        <li>• Custom animations</li>
+                        <li>• Logo animations</li>
+                        <li>• Title sequences</li>
+                        <li>• Visual effects</li>
+                    </ul>
+                </div>
+                <div class="service-card glass-effect rounded-2xl p-8 hover:scale-105 transition-all duration-300">
+                    <div class="w-16 h-16 bg-gradient-to-r from-neon-blue to-neon-purple rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-volume-up text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-neon-blue">Audio Post</h3>
+                    <p class="opacity-80 mb-6">
+                        Professional audio editing, mixing, and mastering to ensure crystal-clear sound that complements your visuals.
+                    </p>
+                    <ul class="space-y-2 text-sm opacity-70">
+                        <li>• Audio cleanup</li>
+                        <li>• Sound mixing</li>
+                        <li>• Music composition</li>
+                        <li>• Voiceover editing</li>
+                    </ul>
+                </div>
+                <div class="service-card glass-effect rounded-2xl p-8 hover:scale-105 transition-all duration-300">
+                    <div class="w-16 h-16 bg-gradient-to-r from-neon-purple to-neon-pink rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-film text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-neon-purple">Documentary</h3>
+                    <p class="opacity-80 mb-6">
+                        Specialized documentary editing that weaves compelling narratives from raw footage and interviews.
+                    </p>
+                    <ul class="space-y-2 text-sm opacity-70">
+                        <li>• Story structure</li>
+                        <li>• Interview editing</li>
+                        <li>• B-roll integration</li>
+                        <li>• Fact-checking</li>
+                    </ul>
+                </div>
+                <div class="service-card glass-effect rounded-2xl p-8 hover:scale-105 transition-all duration-300">
+                    <div class="w-16 h-16 bg-gradient-to-r from-neon-pink to-neon-blue rounded-lg flex items-center justify-center mb-6">
+                        <i class="fas fa-rocket text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-neon-pink">Express Delivery</h3>
+                    <p class="opacity-80 mb-6">
+                        Rush projects with guaranteed 24-48 hour turnaround for urgent content needs without compromising quality.
+                    </p>
+                    <ul class="space-y-2 text-sm opacity-70">
+                        <li>• 24/7 availability</li>
+                        <li>• Priority processing</li>
+                        <li>• Quality guarantee</li>
+                        <li>• Live updates</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="py-20 px-6">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="font-cinematic text-5xl font-bold mb-6 gradient-text">Featured Portfolio</h2>
+                <p class="text-xl max-w-3xl mx-auto opacity-80">
+                    A showcase of our finest work across various industries and creative projects
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="portfolio-item group">
+                    <div class="video-frame aspect-video bg-gradient-to-br from-neon-blue/30 to-neon-purple/30 rounded-2xl overflow-hidden relative">
+                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <button class="bg-white/20 backdrop-blur-sm rounded-full p-4 hover:scale-110 transition-transform">
+                                <i class="fas fa-play text-2xl text-white"></i>
+                            </button>
+                        </div>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <h3 class="text-xl font-bold text-white mb-2">Corporate Brand Film</h3>
+                            <p class="text-sm opacity-80">Tech startup promotional video</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="portfolio-item group">
+                    <div class="video-frame aspect-video bg-gradient-to-br from-neon-purple/30 to-neon-pink/30 rounded-2xl overflow-hidden relative">
+                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <button class="bg-white/20 backdrop-blur-sm rounded-full p-4 hover:scale-110 transition-transform">
+                                <i class="fas fa-play text-2xl text-white"></i>
+                            </button>
+                        </div>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <h3 class="text-xl font-bold text-white mb-2">Music Video</h3>
+                            <p class="text-sm opacity-80">Indie artist collaboration</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="portfolio-item group">
+                    <div class="video-frame aspect-video bg-gradient-to-br from-neon-pink/30 to-neon-blue/30 rounded-2xl overflow-hidden relative">
+                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <button class="bg-white/20 backdrop-blur-sm rounded-full p-4 hover:scale-110 transition-transform">
+                                <i class="fas fa-play text-2xl text-white"></i>
+                            </button>
+                        </div>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <h3 class="text-xl font-bold text-white mb-2">Documentary</h3>
+                            <p class="text-sm opacity-80">Environmental awareness film</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="portfolio-item group">
+                    <div class="video-frame aspect-video bg-gradient-to-br from-neon-blue/30 to-neon-pink/30 rounded-2xl overflow-hidden relative">
+                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <button class="bg-white/20 backdrop-blur-sm rounded-full p-4 hover:scale-110 transition-transform">
+                                <i class="fas fa-play text-2xl text-white"></i>
+                            </button>
+                        </div>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <h3 class="text-xl font-bold text-white mb-2">Wedding Film</h3>
+                            <p class="text-sm opacity-80">Cinematic love story</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="portfolio-item group">
+                    <div class="video-frame aspect-video bg-gradient-to-br from-neon-purple/30 to-neon-blue/30 rounded-2xl overflow-hidden relative">
+                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <button class="bg-white/20 backdrop-blur-sm rounded-full p-4 hover:scale-110 transition-transform">
+                                <i class="fas fa-play text-2xl text-white"></i>
+                            </button>
+                        </div>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <h3 class="text-xl font-bold text-white mb-2">Commercial</h3>
+                            <p class="text-sm opacity-80">Product launch campaign</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="portfolio-item group">
+                    <div class="video-frame aspect-video bg-gradient-to-br from-neon-pink/30 to-neon-purple/30 rounded-2xl overflow-hidden relative">
+                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <button class="bg-white/20 backdrop-blur-sm rounded-full p-4 hover:scale-110 transition-transform">
+                                <i class="fas fa-play text-2xl text-white"></i>
+                            </button>
+                        </div>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <h3 class="text-xl font-bold text-white mb-2">Event Highlight</h3>
+                            <p class="text-sm opacity-80">Conference recap video</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-12">
+                <button class="border-2 border-neon-blue px-8 py-3 rounded-full font-semibold hover:bg-neon-blue hover:text-dark-slate transition-all duration-300">
+                    View Full Portfolio
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 px-6 bg-dark-gray/30">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="font-cinematic text-5xl font-bold mb-6 gradient-text">Pricing Plans</h2>
+                <p class="text-xl max-w-3xl mx-auto opacity-80">
+                    Flexible pricing options to suit every project and budget
+                </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <div class="pricing-card glass-effect rounded-2xl p-8 hover:scale-105 transition-all duration-300">
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold mb-4 text-neon-blue">Essential</h3>
+                        <div class="text-4xl font-bold mb-2">$299</div>
+                        <p class="opacity-60">Per project</p>
+                    </div>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-blue mr-3"></i>
+                            <span>Up to 5 minutes final video</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-blue mr-3"></i>
+                            <span>Basic color correction</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-blue mr-3"></i>
+                            <span>Standard transitions</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-blue mr-3"></i>
+                            <span>Audio cleanup</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-blue mr-3"></i>
+                            <span>2 revision rounds</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-blue mr-3"></i>
+                            <span>7-day delivery</span>
+                        </li>
+                    </ul>
+                    <button class="w-full bg-neon-blue text-dark-slate py-3 rounded-lg font-semibold hover:bg-neon-blue/80 transition-colors">
+                        Get Started
+                    </button>
+                </div>
+                
+                <div class="pricing-card featured glass-effect rounded-2xl p-8 hover:scale-105 transition-all duration-300 relative">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-neon-blue to-neon-purple px-6 py-2 rounded-full text-sm font-bold">
+                        MOST POPULAR
+                    </div>
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold mb-4 text-neon-purple">Professional</h3>
+                        <div class="text-4xl font-bold mb-2">$799</div>
+                        <p class="opacity-60">Per project</p>
+                    </div>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-purple mr-3"></i>
+                            <span>Up to 15 minutes final video</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-purple mr-3"></i>
+                            <span>Cinematic color grading</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-purple mr-3"></i>
+                            <span>Custom motion graphics</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-purple mr-3"></i>
+                            <span>Professional audio mix</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-purple mr-3"></i>
+                            <span>Unlimited revisions</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-purple mr-3"></i>
+                            <span>4K delivery</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-purple mr-3"></i>
+                            <span>5-day delivery</span>
+                        </li>
+                    </ul>
+                    <button class="w-full bg-gradient-to-r from-neon-purple to-neon-pink text-white py-3 rounded-lg font-semibold hover:scale-105 transition-transform">
+                        Choose Professional
+                    </button>
+                </div>
+                
+                <div class="pricing-card glass-effect rounded-2xl p-8 hover:scale-105 transition-all duration-300">
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold mb-4 text-neon-pink">Premium</h3>
+                        <div class="text-4xl font-bold mb-2">$1,499</div>
+                        <p class="opacity-60">Per project</p>
+                    </div>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-pink mr-3"></i>
+                            <span>Unlimited video length</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-pink mr-3"></i>
+                            <span>Hollywood-grade grading</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-pink mr-3"></i>
+                            <span>Advanced VFX & animations</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-pink mr-3"></i>
+                            <span>Surround sound mixing</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-pink mr-3"></i>
+                            <span>Unlimited revisions</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-pink mr-3"></i>
+                            <span>8K delivery available</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-neon-pink mr-3"></i>
+                            <span>3-day delivery</span>
+                        </li>
+                    </ul>
+                    <button class="w-full bg-neon-pink text-dark-slate py-3 rounded-lg font-semibold hover:bg-neon-pink/80 transition-colors">
+                        Go Premium
+                    </button>
+                </div>
+            </div>
+            <div class="text-center mt-12">
+                <p class="text-lg opacity-80 mb-4">Need a custom quote for your project?</p>
+                <button class="border-2 border-neon-blue px-8 py-3 rounded-full font-semibold hover:bg-neon-blue hover:text-dark-slate transition-all duration-300">
+                    Contact for Custom Quote
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-20 px-6">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="font-cinematic text-5xl font-bold mb-6 gradient-text">Client Testimonials</h2>
+                <p class="text-xl max-w-3xl mx-auto opacity-80">
+                    What our clients say about working with VisuaLux Studios
+                </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass-effect rounded-2xl p-8 hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-gradient-to-r from-neon-blue to-neon-purple rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg">Sarah Mitchell</h4>
+                            <p class="opacity-60">CEO, TechStart Inc.</p>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="flex text-yellow-400 mb-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="opacity-80">
+                        "VisuaLux transformed our corporate video from ordinary to extraordinary. The attention to detail and creative vision exceeded all expectations. Our engagement rates increased by 300%!"
+                    </p>
+                </div>
+                <div class="glass-effect rounded-2xl p-8 hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-gradient-to-r from-neon-purple to-neon-pink rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg">Marcus Rodriguez</h4>
+                            <p class="opacity-60">Music Producer</p>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="flex text-yellow-400 mb-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="opacity-80">
+                        "The music video editing was phenomenal. They captured the essence of our sound visually in ways we never imagined. Professional, creative, and delivered on time."
+                    </p>
+                </div>
+                <div class="glass-effect rounded-2xl p-8 hover:scale-105 transition-all duration-300">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-gradient-to-r from-neon-pink to-neon-blue rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg">Emily Chen</h4>
+                            <p class="opacity-60">Documentary Filmmaker</p>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="flex text-yellow-400 mb-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="opacity-80">
+                        "Working with VisuaLux on our environmental documentary was incredible. They understood our message and enhanced it through masterful editing and color grading."
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 px-6 bg-dark-gray/50">
+        <div class="container mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="font-cinematic text-5xl font-bold mb-6 gradient-text">Get In Touch</h2>
+                <p class="text-xl max-w-3xl mx-auto opacity-80">
+                    Ready to bring your vision to life? Let's discuss your project
+                </p>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-16 max-w-6xl mx-auto">
+                <div class="space-y-8">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-r from-neon-blue to-neon-purple rounded-lg flex items-center justify-center">
+                            <i class="fas fa-phone text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2 text-neon-blue">Phone</h3>
+                            <p class="opacity-80">+1 (555) 123-4567</p>
+                            <p class="opacity-60 text-sm">Available 9 AM - 8 PM EST</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-r from-neon-purple to-neon-pink rounded-lg flex items-center justify-center">
+                            <i class="fas fa-envelope text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2 text-neon-purple">Email</h3>
+                            <p class="opacity-80">hello@visualuxstudios.com</p>
+                            <p class="opacity-60 text-sm">Response within 2 hours</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 bg-gradient-to-r from-neon-pink to-neon-blue rounded-lg flex items-center justify-center">
+                            <i class="fas fa-map-marker-alt text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2 text-neon-pink">Studio</h3>
+                            <p class="opacity-80">123 Creative District<br>Los Angeles, CA 90028</p>
+                            <p class="opacity-60 text-sm">By appointment only</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-4 pt-8">
+                        <a href="#" class="w-12 h-12 bg-gradient-to-r from-neon-blue to-neon-purple rounded-full flex items-center justify-center hover:scale-110 transition-transform">
+                            <i class="fab fa-instagram text-white"></i>
+                        </a>
+                        <a href="#" class="w-12 h-12 bg-gradient-to-r from-neon-purple to-neon-pink rounded-full flex items-center justify-center hover:scale-110 transition-transform">
+                            <i class="fab fa-youtube text-white"></i>
+                        </a>
+                        <a href="#" class="w-12 h-12 bg-gradient-to-r from-neon-pink to-neon-blue rounded-full flex items-center justify-center hover:scale-110 transition-transform">
+                            <i class="fab fa-vimeo text-white"></i>
+                        </a>
+                        <a href="#" class="w-12 h-12 bg-gradient-to-r from-neon-blue to-neon-purple rounded-full flex items-center justify-center hover:scale-110 transition-transform">
+                            <i class="fab fa-linkedin text-white"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="contact-form glass-effect rounded-2xl p-8">
+                    <form class="space-y-6" id="contact-form">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold mb-2 text-neon-blue">First Name</label>
+                                <input type="text" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:border-neon-blue focus:outline-none transition-colors" placeholder="John" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold mb-2 text-neon-blue">Last Name</label>
+                                <input type="text" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:border-neon-blue focus:outline-none transition-colors" placeholder="Doe" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2 text-neon-blue">Email</label>
+                            <input type="email" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:border-neon-blue focus:outline-none transition-colors" placeholder="john@example.com" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2 text-neon-blue">Project Type</label>
+                            <select class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:border-neon-blue focus:outline-none transition-colors">
+                                <option value="">Select a service</option>
+                                <option value="corporate">Corporate Video</option>
+                                <option value="music">Music Video</option>
+                                <option value="documentary">Documentary</option>
+                                <option value="commercial">Commercial</option>
+                                <option value="wedding">Wedding</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2 text-neon-blue">Budget Range</label>
+                            <select class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:border-neon-blue focus:outline-none transition-colors">
+                                <option value="">Select budget range</option>
+                                <option value="under-500">Under $500</option>
+                                <option value="500-1000">$500 - $1,000</option>
+                                <option value="1000-2500">$1,000 - $2,500</option>
+                                <option value="2500-5000">$2,500 - $5,000</option>
+                                <option value="over-5000">Over $5,000</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2 text-neon-blue">Project Details</label>
+                            <textarea rows="4" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:border-neon-blue focus:outline-none transition-colors resize-none" placeholder="Tell us about your project vision, timeline, and any specific requirements..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-gradient-to-r from-neon-blue to-neon-purple py-4 rounded-lg font-semibold text-lg hover:scale-105 transition-transform">
+                            Send Project Inquiry
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark-slate py-12 px-6 border-t border-white/10">
+        <div class="container mx-auto">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-6">
+                        <div class="w-10 h-10 bg-gradient-to-r from-neon-blue to-neon-purple rounded-lg flex items-center justify-center">
+                            <i class="fas fa-video text-white text-xl"></i>
+                        </div>
+                        <span class="font-cinematic text-2xl font-bold gradient-text">VisuaLux</span>
+                    </div>
+                    <p class="opacity-80 mb-4">
+                        Transforming visions into cinematic reality through the art of video editing excellence.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-neon-blue hover:text-neon-purple transition-colors">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-neon-blue hover:text-neon-purple transition-colors">
+                            <i class="fab fa-youtube text-xl"></i>
+                        </a>
+                        <a href="#" class="text-neon-blue hover:text-neon-purple transition-colors">
+                            <i class="fab fa-vimeo text-xl"></i>
+                        </a>
+                        <a href="#" class="text-neon-blue hover:text-neon-purple transition-colors">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-4 text-neon-blue">Services</h3>
+                    <ul class="space-y-2 opacity-80">
+                        <li><a href="#" class="hover:text-neon-blue transition-colors">Video Editing</a></li>
+                        <li><a href="#" class="hover:text-neon-blue transition-colors">Color Grading</a></li>
+                        <li><a href="#" class="hover:text-neon-blue transition-colors">Motion Graphics</a></li>
+                        <li><a href="#" class="hover:text-neon-blue transition-colors">Audio Post</a></li>
+                        <li><a href="#" class="hover:text-neon-blue transition-colors">Documentary</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-4 text-neon-purple">Company</h3>
+                    <ul class="space-y-2 opacity-80">
+                        <li><a href="#" class="hover:text-neon-purple transition-colors">About Us</a></li>
+                        <li><a href="#" class="hover:text-neon-purple transition-colors">Portfolio</a></li>
+                        <li><a href="#" class="hover:text-neon-purple transition-colors">Careers</a></li>
+                        <li><a href="#" class="hover:text-neon-purple transition-colors">Blog</a></li>
+                        <li><a href="#" class="hover:text-neon-purple transition-colors">Press Kit</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-4 text-neon-pink">Contact</h3>
+                    <ul class="space-y-2 opacity-80">
+                        <li>+1 (555) 123-4567</li>
+                        <li>hello@visualuxstudios.com</li>
+                        <li>123 Creative District</li>
+                        <li>Los Angeles, CA 90028</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/10 mt-12 pt-8 text-center opacity-60">
+                <p>&copy; 2025 VisuaLux Studios. All rights reserved. | Privacy Policy | Terms of Service</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Three.js Background Animation
+        let scene, camera, renderer, particles;
+        
+        function initThree() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('three-container').appendChild(renderer.domElement);
+            
+            // Create particles
+            const geometry = new THREE.BufferGeometry();
+            const vertices = [];
+            const colors = [];
+            
+            for (let i = 0; i < 1000; i++) {
+                vertices.push(
+                    (Math.random() - 0.5) * 2000,
+                    (Math.random() - 0.5) * 2000,
+                    (Math.random() - 0.5) * 2000
+                );
+                
+                const color = new THREE.Color();
+                color.setHSL(Math.random() * 0.3 + 0.5, 0.8, 0.5);
+                colors.push(color.r, color.g, color.b);
+            }
+            
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            
+            const material = new THREE.PointsMaterial({
+                size: 2,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.6
+            });
+            
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+            
+            camera.position.z = 1000;
+            animate();
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (particles) {
+                particles.rotation.x += 0.0005;
+                particles.rotation.y += 0.001;
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Navigation functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            initThree();
+            
+            // Mobile menu toggle
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            mobileMenuBtn.addEventListener('click', function() {
+                mobileMenu.classList.toggle('-translate-x-full');
+            });
+            
+            // Close mobile menu when clicking on a link
+            document.querySelectorAll('.mobile-menu-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    mobileMenu.classList.add('-translate-x-full');
+                });
+            });
+            
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+            
+            // Scroll progress indicator
+            const scrollIndicator = document.querySelector('.scroll-indicator');
+            
+            window.addEventListener('scroll', function() {
+                const scrollTop = window.pageYOffset;
+                const docHeight = document.body.scrollHeight - window.innerHeight;
+                const scrollPercent = scrollTop / docHeight;
+                scrollIndicator.style.transform = `scaleX(${scrollPercent})`;
+            });
+            
+            // Navbar background on scroll
+            const navbar = document.getElementById('navbar');
+            
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    navbar.style.background = 'rgba(15, 23, 42, 0.95)';
+                    navbar.style.backdropFilter = 'blur(20px)';
+                } else {
+                    navbar.style.background = 'rgba(255, 255, 255, 0.1)';
+                    navbar.style.backdropFilter = 'blur(10px)';
+                }
+            });
+            
+            // Intersection Observer for animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+            
+            // Observe all sections
+            document.querySelectorAll('section').forEach(section => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(50px)';
+                section.style.transition = 'all 0.8s ease-out';
+                observer.observe(section);
+            });
+            
+            // Contact form submission
+            document.getElementById('contact-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Simulate form submission
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                
+                submitBtn.textContent = 'Sending...';
+                submitBtn.disabled = true;
+                
+                setTimeout(() => {
+                    submitBtn.textContent = 'Message Sent!';
+                    submitBtn.style.background = 'linear-gradient(90deg, #10B981, #059669)';
+                    
+                    setTimeout(() => {
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                        submitBtn.style.background = 'linear-gradient(90deg, #00D4FF, #8B5CF6)';
+                        this.reset();
+                    },
