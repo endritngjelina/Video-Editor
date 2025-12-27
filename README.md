@@ -54,7 +54,7 @@ Contributions and suggestions are welcome.
 1. Fork the repository.
 2. Create a new branch for your feature or fix.
 3. Commit and push your changes.
-4. Open a pull request describing what you changed and why.[web:7][web:10]
+4. Open a pull request describing what you changed and why.
 
 ## License
 
